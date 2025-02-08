@@ -93,8 +93,11 @@ FSM 로직: behavior_planner_FSM.cpp에서 상태 전환과 로직을 설계.
                                        //값이 크면: 더 부드러운 경로가 생성되지만 계산량이 증가, 값이 작으면: 경로가 부자연스러워질 수 있음
                                        //보통 10~20 정도가 적절한 값으로 사용됨! , 값을 너무 작게 설정하면 차량이 순간이동하듯 움직일 수 있음
 
-#define P_STOP_THRESHOLD_DISTANCE \ //--> 차량이 정지 상태(STOPPED)로 전환할 때 사용하는 거리 기준 --->BEHAVIOR_PLANNER_FSM.CPP
-  P_LOOKAHEAD_MIN / P_NUM_POINTS_IN_SPIRAL * 2  // m   // 정지 거리 기준 계산 (m)
+#define P_STOP_THRESHOLD_DISTANCE \                                   
+  P_LOOKAHEAD_MIN / P_NUM_POINTS_IN_SPIRAL * 2 
+                                            // distance \ 역슬래시 뒤에 띄어쓰기 하면 안됨, 주석을 다르곳에 달아야함.
+                                           //--> 차량이 정지 상태(STOPPED)로 전환할 때 사용하는 거리 기준 --->BEHAVIOR_PLANNER_FSM.CPP 
+                                          // m   // 정지 거리 기준 계산 (m)
 
 constexpr std::array<float, 3> CIRCLE_OFFSETS = {-1.0, 1.0, 3.0};  // m // 차량 주변 원 위치 (m) -->COST_FUNCTIONS.CPP
  
