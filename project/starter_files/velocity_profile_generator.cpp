@@ -109,8 +109,7 @@ std::vector<TrajectoryPoint> VelocityProfileGenerator::generate_trajectory(
    // FOLLOW_VEHICLE 상태인 경우, 선행 차량을 따라가는 궤적 생성
   else if (maneuver == FOLLOW_VEHICLE) {
     // LOG(INFO) << "Generating velocity trajectory for FOLLOW_VEHICLE";
-    trajectory =
-        follow_trajectory(spiral, start_speed, desired_speed, lead_car_state);
+    trajectory = follow_trajectory(spiral, start_speed, desired_speed, lead_car_state);
   }
 
   // Otherwise, compute the trajectory to reach our desired speed.
