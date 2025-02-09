@@ -1,3 +1,7 @@
+
+
+
+
 /* 
 주요 로직
 입방 나선 생성: motion_planner.cpp 파일에서 구현된 입방 나선을 사용하여 목표를 따라가며 경로를 생성.
@@ -141,9 +145,13 @@ double BehaviorPlannerFSM::get_look_ahead_distance(const State& ego_state) {
 
   
   // lookahead_distance를 최소 및 최대 값으로 제한
+  // 차량이 현재 속도로 주행 중일 때, 안전하게 정지할 수 있는 거리를 계산해야 함
   look_ahead_distance =
       std::min(std::max(look_ahead_distance, _lookahead_distance_min),
-               _lookahead_distance_max);
+               _lookahead_distance_max);  // _lookahead_distance_min, _lookahead_distance_max가  planning_params.h의 P_LOOKAHEAD_MIN 및 P_LOOKAHEAD_MAX와 연결됨.
+
+
+
 
   // LOG(INFO) << "Final look_ahead_distance: " << look_ahead_distance;
 
@@ -212,7 +220,7 @@ State BehaviorPlannerFSM::state_transition(const State& ego_state, State goal,
       // use cosine and sine to get x and y
       
        // 정지선 뒤에 목표 위치를 설정
-      auto ang = goal.rotation.yaw + M_PI;
+      auto ang = goal.rotation.yaw + M_PI; 
       //goal.location.x += 1.0;  // <- Fix This, 이 값을 바꿔라
       //goal.location.y += 1.0;  // <- Fix This
 
@@ -220,6 +228,9 @@ State BehaviorPlannerFSM::state_transition(const State& ego_state, State goal,
       //이 부분은 차량이 정지선에서 너무 앞으로 나가지 않게 하기 위해 살짝 뒤쪽으로 목표를 조정하는 코드
       goal.location.x -= _stop_line_buffer * std::cos(ang); //차량이 정지선에서 약간 뒤쪽으로 멈추도록 조정
       goal.location.y -= _stop_line_buffer * std::sin(ang); //	정지선 기준으로 목표 위치를 후진 방향으로 이동
+                                                             //_stop_line_buffer가 planning_params.h의 P_STOP_LINE_BUFFER와 연결됨.
+
+
       //goal.location : 차량이 멈춰야할 목표지점
       //_stop_line_buffer는 정지선보다 약간 뒤쪽에서 멈추도록 조정하는 거리 값
       //ang = goal.rotation.yaw + M_PI 이므로 현재 방향(yaw)에서 180도 반대 방향을 계산
@@ -257,6 +268,9 @@ State BehaviorPlannerFSM::state_transition(const State& ego_state, State goal,
       goal.velocity.x = _speed_limit * std::cos(goal.rotation.yaw); //차량이 도로 방향을 따라 속도를 설정
       goal.velocity.y = _speed_limit * std::sin(goal.rotation.yaw); //차량이 도로 진행 방향으로 자연스럽게 움직이도록 설정
       //_speed_limit은 차량의 목표 속도
+      //_speed_limit가 planning_params.h의  P_SPEED_LIMIT와 연결됨.
+
+
       //goal.rotation.yaw는 차량이 향하는 방향 (도로 진행 방향)
       //cos(goal.rotation.yaw), sin(goal.rotation.yaw)을 사용하여 x축, y축 방향 속도 계산
 
@@ -300,11 +314,14 @@ State BehaviorPlannerFSM::state_transition(const State& ego_state, State goal,
     //    _stop_threshold_speed) {  // -> Fix this //그래서 주석처리
       
       // 정지선까지의 거리가 임계값 이하인 경우, STOPPED 상태로 전환
-      if (distance_to_stop_sign <= P_STOP_THRESHOLD_DISTANCE) { //(거리비교 코드를 주석해제)
+      if (distance_to_stop_sign <= P_STOP_THRESHOLD_DISTANCE) { //(거리비교 코드를 주석해제) , planning_params.h의 P_STOP_THRESHOLD_DISTANCE가 차량이 정지할 거리 기준으로 사용됨.
       // TODO-move to STOPPED state: Now that we know we are close or at the
       // stopping point we should change state to "STOPPED"
       //_active_maneuver = ;  // <- Fix This
       _active_maneuver = STOPPED; //Stopped상태로 이동
+      
+
+
       _start_stop_time = std::chrono::high_resolution_clock::now(); //이 부분은 그대로 사용
       // LOG(INFO) << "BP - changing to STOPPED";
     }
@@ -335,6 +352,7 @@ State BehaviorPlannerFSM::state_transition(const State& ego_state, State goal,
     // 정지 시간이 요구 시간을 초과하고 신호등이 빨간불이 아닌 경우, FOLLOW_LANE 상태로 전환
     if (stopped_secs >= _req_stop_time && tl_state.compare("Red") != 0) { //이 부분은 그대로 사용
                                                                          // _req_stop_time = 2.0 ~ 3.0초 정도로 설정하는 것이 적절
+                                                                         //_req_stop_time이  planning_params.h의 P_REQ_STOPPED_TIME과 연결됨.
 
       // TODO-move to FOLLOW_LANE state: What state do we want to move to, when --> 이 조건에서 Follow_Lane으로 전환해야함
       // we are "done" at the STOPPED state?
@@ -347,6 +365,7 @@ State BehaviorPlannerFSM::state_transition(const State& ego_state, State goal,
   _goal = goal;   // 최종 목표 상태를 저장하고 반환
   return goal;
 }
+
 
 
 
